@@ -1,5 +1,9 @@
+import logging
+
+logger = logging.getLogger('ph')
+
 def auth():
     """Authenticate the user."""
-    print( input("Token: ") )
+    logger.info( input("Token: ") )
     return True
 
