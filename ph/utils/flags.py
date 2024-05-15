@@ -100,3 +100,35 @@ def create_flag(key, description, rollout_percentage):
             logger.error(f"Redirection URL: {response.headers.get('Location')}")
         else:
             logger.error(f"Error: {response.status_code}")
+
+def delete_flag(key):
+    """Delete flag."""
+    headers = get_headers()
+    project_id = read_project_from_file()
+    url = get_url(f'api/projects/{project_id}/feature_flags')
+    response = requests.get(url, headers=headers, allow_redirects=False)
+    if response.status_code == 200:
+        data = response.json()
+        results = data.get('results')
+
+        display_to_id = {option['key']: option['id'] for option in results}
+        id = display_to_id[key]
+
+        url = get_url(f'api/projects/{project_id}/feature_flags/{id}')
+        response = requests.delete(url, headers=headers, allow_redirects=False)
+        if response.status_code == 204:
+            logger.info(f"Flag deleted: {key}")
+        else:
+            if response.status_code == 401:
+                logger.error(f"{response.status_code} Invalid token provided.")
+            elif response.status_code == 302:
+                logger.error(f"Redirection URL: {response.headers.get('Location')}")
+            else:
+                logger.error(f"Error: {response.status_code}")
+    else:
+        if response.status_code == 401:
+            logger.error(f"{response.status_code} Invalid token provided.")
+        elif response.status_code == 302:
+            logger.error(f"Redirection URL: {response.headers.get('Location')}")
+        else:
+            logger.error(f"Error: {response.status_code}")
