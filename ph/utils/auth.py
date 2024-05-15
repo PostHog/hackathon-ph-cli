@@ -21,6 +21,22 @@ def read_token_from_file():
             return data["credentials"]["app.dev.posthog.dev"]["token"]
     except (FileNotFoundError, KeyError):
         return None
+    
+def read_organization_from_file():
+    try:
+        with open(CREDENTIALS_FILE, 'r') as file:
+            data = json.load(file)
+            return data["credentials"]["app.dev.posthog.dev"]["organization"]
+    except (FileNotFoundError, KeyError):
+        return None
+    
+def read_project_from_file():
+    try:
+        with open(CREDENTIALS_FILE, 'r') as file:
+            data = json.load(file)
+            return data["credentials"]["app.dev.posthog.dev"]["project"]
+    except (FileNotFoundError, KeyError):
+        return None
 
 def delete_token_from_file():
     try:
@@ -100,7 +116,14 @@ def auth():
     response = requests.get(url, headers=headers, allow_redirects=False)
     if response.status_code == 200:
         data = response.json()
-        list_org(data)
+        org = read_organization_from_file()
+
+        if not org:
+            select_org(data)
+        project = read_project_from_file()
+        
+        if not project:
+            list_project()
     else:
         if response.status_code == 401:
             logger.error(f"{response.status_code} Invalid token provided.")
@@ -111,7 +134,8 @@ def auth():
         delete_token_from_file()
         exit(-1)
 
-def list_org(data):
+def select_org(data):
+    """Select the organization."""
     results = data.get('results')
     # TODO: name isnt unique
     display_to_id = {option['name']: option['id'] for option in results}
@@ -128,3 +152,43 @@ def list_org(data):
     selected_id = display_to_id[selected_display]
     logger.info(f"Selected organization: {selected_display}: {selected_id}")
     save_token_to_file(get_token(), selected_id, "")
+
+def select_project(data):
+    """Select the project."""
+    results = data.get('results')
+    display_to_id = {option['name']: option['id'] for option in results}
+    choices = list(display_to_id.keys())
+
+    questions = [
+        inquirer.List('select_project',
+                      message="Select project",
+                      choices=choices,
+                      ),
+    ]
+    answers = inquirer.prompt(questions)
+    selected_display = answers.get('select_project')
+    selected_id = display_to_id[selected_display]
+    logger.info(f"Selected project: {selected_display}: {selected_id}")
+    org = read_organization_from_file()
+    save_token_to_file(get_token(), org, selected_id)
+
+def list_project():
+    """Select the project."""
+    headers = get_headers()
+
+    org = read_organization_from_file()
+    url = get_url(f'api/organizations/{org}/projects')
+
+    response = requests.get(url, headers=headers, allow_redirects=False)
+    if response.status_code == 200:
+        data = response.json()
+        select_project(data)
+    else:
+        if response.status_code == 401:
+            logger.error(f"{response.status_code} Invalid token provided.")
+        elif response.status_code == 302:
+            logger.error(f"Redirection URL: {response.headers.get('Location')}")
+        else:
+            logger.error(f"Error: {response.status_code}")
+        delete_token_from_file()
+        exit(-1)

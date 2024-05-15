@@ -1,20 +1,23 @@
 import click
 import logging
 import os
-from .utils.auth import auth
+from .utils.auth import auth, delete_token_from_file
 from rich.logging import RichHandler
 from rich.console import Console
 
 console = Console()
 
 @click.command()
-@click.argument('mode', type=click.Choice(['login', 'flags']))
+@click.argument('mode', type=click.Choice(['login', 'flags', 'logout']))
 def main(mode):
     """Posthog CLI"""
     setup_logger()
     logger = logging.getLogger('ph')
 
-    if mode == 'login':
+    if mode == 'logout':
+        logger.debug("Logout selected")
+        delete_token_from_file()
+    elif mode == 'login':
         logger.debug("Login mode selected")
         auth()
     elif mode == 'flags':
