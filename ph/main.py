@@ -28,7 +28,7 @@ def setup_logger():
     logging.root.setLevel(logging.NOTSET)
 
     # Configure your application's logger
-    log_level_name = os.getenv('FT_LOG_LEVEL', 'INFO').upper()
+    log_level_name = os.getenv('PH_LOG_LEVEL', 'INFO').upper()
     app_log_level = getattr(logging, log_level_name, logging.INFO)
 
     # Setup the 'ph' logger to use RichHandler with the shared console instance
