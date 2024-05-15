@@ -151,18 +151,23 @@ def auth(switch_organization=False, switch_project=False):
 
 def create_token():
     url = get_url('api/login/cli/start')
+
     response = requests.post(url, allow_redirects=False)
-    data = response.json()
-    logger.info(f"data cli start: {data}")
 
     if response.status_code == 200:
+        data = response.json()
+        logger.info(f"data cli start: {data}")
 
         url = get_url('api/login/cli')
         response = requests.get(url, allow_redirects=False, params={"code": data.get('code')})
-        data = response.json()
-        logger.info(f"data login cli: {data}")
+
+        # TODO: if not authenticated yet, keep polling?
+        # {'type': 'authentication_error', 'code': 'not_authenticated', 'detail': 'Authentication credentials were not provided.', 'attr': None}
 
         if response.status_code == 200:
+            data = response.json()
+            logger.info(f"data login cli: {data}")
+
             confirm = data.get('confirm')
         else:
             logger.error(f"Error: {response.status_code}")
@@ -174,10 +179,11 @@ def create_token():
             while (True):
                 url = get_url('api/login/cli/check')
                 response = requests.get(url, allow_redirects=False, params={"code": data.get('code')})
-                data = response.json()
-                logger.info(f"data login check: {data}")
 
                 if response.status_code == 200:
+                    data = response.json()
+                    logger.info(f"data login check: {data}")
+
                     status = data.get('status')
 
                     if status == "authenticated":
