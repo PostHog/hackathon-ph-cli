@@ -2,15 +2,16 @@ import logging
 import requests
 import os
 import json
+import inquirer
 
 logger = logging.getLogger('ph')
 
 CREDENTIALS_FILE = os.path.expanduser('~/.posthog/credentials.json')
 
-def save_token_to_file(token):
+def save_token_to_file(token, org, project):
     os.makedirs(os.path.dirname(CREDENTIALS_FILE), exist_ok=True)
     with open(CREDENTIALS_FILE, 'w') as file:
-        json.dump({"credentials": {"app.dev.posthog.dev": {"token": token, "organization": "", "project": ""}}}, file)
+        json.dump({"credentials": {"app.dev.posthog.dev": {"token": token, "organization": org, "project": project}}}, file)
 
 
 def read_token_from_file():
@@ -37,7 +38,7 @@ def get_url(api_part):
         api_port = f":{api_port}"
     return f"{api_protocol}://{api_host}{api_port}/{api_part}"
 
-def get_headers():
+def get_token():
     api_token = os.environ.get('PH_API_TOKEN')
     if not api_token:
         api_token = read_token_from_file()
@@ -47,14 +48,17 @@ def get_headers():
         api_token = prompt_for_token(auth_url)
         if api_token:
             os.environ['PH_API_TOKEN'] = api_token
-            save_token_to_file(api_token)
+            save_token_to_file(api_token, "", "")
         else:
             logger.error("No token provided.")
             exit()
 
+    return api_token
+
+def get_headers():
     return {
         'Content-Type': 'application/json',
-        "Authorization": "Bearer " + api_token
+        "Authorization": "Bearer " + get_token()
     }
 
 
@@ -75,7 +79,7 @@ def get_headers():
         api_token = prompt_for_token(auth_url)
         if api_token:
             os.environ['PH_API_TOKEN'] = api_token
-            save_token_to_file(api_token)
+            save_token_to_file(api_token, "", "")
         else:
             logger.error("No token provided.")
             exit()
@@ -96,6 +100,7 @@ def auth():
     response = requests.get(url, headers=headers, allow_redirects=False)
     if response.status_code == 200:
         data = response.json()
+        list_org(data)
     else:
         if response.status_code == 401:
             logger.error(f"{response.status_code} Invalid token provided.")
@@ -106,3 +111,20 @@ def auth():
         delete_token_from_file()
         exit(-1)
 
+def list_org(data):
+    results = data.get('results')
+    # TODO: name isnt unique
+    display_to_id = {option['name']: option['id'] for option in results}
+    choices = list(display_to_id.keys())
+
+    questions = [
+        inquirer.List('select_org',
+                      message="Select organization",
+                      choices=choices,
+                      ),
+    ]
+    answers = inquirer.prompt(questions)
+    selected_display = answers.get('select_org')
+    selected_id = display_to_id[selected_display]
+    logger.info(f"Selected organization: {selected_display}: {selected_id}")
+    save_token_to_file(get_token(), selected_id, "")
