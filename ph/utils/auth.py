@@ -11,14 +11,30 @@ PH_ENDPOINT = os.environ.get('PH_ENDPOINT', 'app.dev.posthog.dev')
 
 def save_token_to_file(token, org, project):
     os.makedirs(os.path.dirname(CREDENTIALS_FILE), exist_ok=True)
-    with open(CREDENTIALS_FILE, 'w') as file:
-        json.dump({"credentials": {PH_ENDPOINT: {"token": token, "organization": org, "project": project}}}, file)
+    data = {}
+    with open(CREDENTIALS_FILE, 'r') as file:
+        try:
+            data = json.load(file)
+        except Exception as e:
+            pass
+        credentials = data.get("credentials", {})
+        endpoint = {"token": token, "organization": org, "project": project}
+        credentials[PH_ENDPOINT] = endpoint
+        data["credentials"] = credentials
 
+    with open(CREDENTIALS_FILE, 'w') as file:
+        try:
+            json.dump(data, file)
+        except Exception as e:
+            return None
 
 def read_token_from_file():
     try:
         with open(CREDENTIALS_FILE, 'r') as file:
-            data = json.load(file)
+            try:
+                data = json.load(file)
+            except Exception:
+                return None
             return data["credentials"][PH_ENDPOINT]["token"]
     except (FileNotFoundError, KeyError):
         return None
@@ -26,7 +42,10 @@ def read_token_from_file():
 def read_organization_from_file():
     try:
         with open(CREDENTIALS_FILE, 'r') as file:
-            data = json.load(file)
+            try:
+                data = json.load(file)
+            except Exception:
+                return None
             return data["credentials"][PH_ENDPOINT]["organization"]
     except (FileNotFoundError, KeyError):
         return None
@@ -34,7 +53,10 @@ def read_organization_from_file():
 def read_project_from_file():
     try:
         with open(CREDENTIALS_FILE, 'r') as file:
-            data = json.load(file)
+            try:
+                data = json.load(file)
+            except Exception:
+                return None
             return data["credentials"][PH_ENDPOINT]["project"]
     except (FileNotFoundError, KeyError):
         return None
@@ -42,10 +64,19 @@ def read_project_from_file():
 def delete_token_from_file():
     try:
         if os.path.exists(CREDENTIALS_FILE):
-            os.remove(CREDENTIALS_FILE)
-    except Exception as e:
-        logger.error(f"Failed to delete token from file: {e}")
+            data = {}
+            with open(CREDENTIALS_FILE, 'r') as file:
+                try:
+                    data = json.load(file)
+                except Exception:
+                    return
+                if PH_ENDPOINT in data["credentials"]:
+                    del data["credentials"][PH_ENDPOINT]
+            with open(CREDENTIALS_FILE, 'w') as file:
+                json.dump(data, file)
 
+    except (FileNotFoundError, KeyError) as e:
+        return
 
 def get_url(api_part):
     api_protocol = os.environ.get('PH_API_PROTOCOL_WEB', 'https')
@@ -85,29 +116,8 @@ def prompt_for_token(auth_url):
     return input("Token: ")
 
 
-def get_headers():
-    api_token = os.environ.get('PH_API_TOKEN')
-    if not api_token:
-        api_token = read_token_from_file()
-
-    if not api_token:
-        auth_url = get_url('organization/apikeys')
-        api_token = prompt_for_token(auth_url)
-        if api_token:
-            os.environ['PH_API_TOKEN'] = api_token
-            save_token_to_file(api_token, "", "")
-        else:
-            logger.error("No token provided.")
-            exit()
-
-    return {
-        'Content-Type': 'application/json',
-        "Authorization": "Bearer " + api_token
-    }
-
-
-def auth(switch_organization=False):
-    """Authenticate the user."""
+def auth(switch_organization=False, switch_project=False):
+    """Authenticate the user or switch organization or project."""
     headers = get_headers()
 
     # validate if account is active
@@ -122,7 +132,7 @@ def auth(switch_organization=False):
             select_org(data)
         project = read_project_from_file()
         
-        if not project:
+        if not project or switch_project:
             list_project()
     else:
         if response.status_code == 401:

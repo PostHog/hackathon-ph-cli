@@ -30,6 +30,11 @@ def organization():
     logger.debug("Change organization")
     auth(switch_organization=True)
 
+@main.command()
+def project():
+    logger.debug("Change project")
+    auth(switch_project=True)
+
 @click.group()
 def flags():
     pass
