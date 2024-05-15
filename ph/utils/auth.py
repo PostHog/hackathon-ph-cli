@@ -106,7 +106,7 @@ def get_headers():
     }
 
 
-def auth():
+def auth(switch_organization=False):
     """Authenticate the user."""
     headers = get_headers()
 
@@ -118,7 +118,7 @@ def auth():
         data = response.json()
         org = read_organization_from_file()
 
-        if not org:
+        if not org or switch_organization:
             select_org(data)
         project = read_project_from_file()
         

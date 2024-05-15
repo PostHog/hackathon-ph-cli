@@ -16,6 +16,10 @@ def list_flags():
         data = response.json()
         results = data.get('results')
 
+        if not results:
+            logger.info("No flags found.")
+            return
+
         display_to_id = {option['key']: option['id'] for option in results}
         choices = list(display_to_id.keys())
 

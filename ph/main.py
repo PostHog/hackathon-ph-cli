@@ -25,6 +25,11 @@ def login():
     logger.debug("Login")
     auth()
 
+@main.command()
+def organization():
+    logger.debug("Change organization")
+    auth(switch_organization=True)
+
 @click.group()
 def flags():
     pass
