@@ -2,7 +2,7 @@ import click
 import logging
 import os
 
-from ph.utils.flags import create_flag, list_flags, delete_flag
+from ph.utils.flags import create_flag, list_flags, delete_flag, update_flag
 from .utils.auth import auth, delete_token_from_file
 from rich.logging import RichHandler
 from rich.console import Console
@@ -47,6 +47,14 @@ def create(key, description, rollout_percentage):
 def delete(key):
     logger.debug("Delete flag")
     delete_flag(key)
+
+@flags.command()
+@click.argument('key')
+@click.option('-d', '--description', default=None, help='Desc/Name of the flag')
+@click.option('-p', '--rollout-percentage', default=None, help='Rollout percentage of the flag')
+def update(key, description, rollout_percentage):
+    logger.debug("Update flag")
+    update_flag(key, description, rollout_percentage)
 
 
 def setup_logger():
