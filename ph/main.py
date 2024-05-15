@@ -1,4 +1,5 @@
 import click
+from .utils.auth import auth
 
 
 @click.command()
@@ -7,6 +8,7 @@ def main(mode):
     """Posthog CLI"""
     if mode == 'login':
         click.echo("Login mode selected")
+        auth()
     elif mode == 'flags':
         click.echo("Flags mode selected")
     else:
