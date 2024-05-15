@@ -1,6 +1,8 @@
 import click
 import logging
 import os
+
+from ph.utils.flags import list_flags
 from .utils.auth import auth, delete_token_from_file
 from rich.logging import RichHandler
 from rich.console import Console
@@ -22,6 +24,7 @@ def main(mode):
         auth()
     elif mode == 'flags':
         logger.debug("Flags mode selected")
+        list_flags()
     else:
         logger.error("Invalid mode selected")
 
