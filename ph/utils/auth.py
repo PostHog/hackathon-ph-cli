@@ -3,6 +3,7 @@ import requests
 import os
 import json
 import inquirer
+import webbrowser 
 
 logger = logging.getLogger('ph')
 
@@ -12,15 +13,19 @@ PH_ENDPOINT = os.environ.get('PH_ENDPOINT', 'app.dev.posthog.dev')
 def save_token_to_file(token, org, project):
     os.makedirs(os.path.dirname(CREDENTIALS_FILE), exist_ok=True)
     data = {}
-    with open(CREDENTIALS_FILE, 'r') as file:
-        try:
-            data = json.load(file)
-        except Exception as e:
-            pass
-        credentials = data.get("credentials", {})
-        endpoint = {"token": token, "organization": org, "project": project}
-        credentials[PH_ENDPOINT] = endpoint
-        data["credentials"] = credentials
+    try:
+        with open(CREDENTIALS_FILE, 'r') as file:
+            try:
+                data = json.load(file)
+            except Exception as e:
+                pass
+    except FileNotFoundError:
+        pass
+
+    credentials = data.get("credentials", {})
+    endpoint = {"token": token, "organization": org, "project": project}
+    credentials[PH_ENDPOINT] = endpoint
+    data["credentials"] = credentials
 
     with open(CREDENTIALS_FILE, 'w') as file:
         try:
@@ -91,8 +96,7 @@ def get_token():
         api_token = read_token_from_file()
 
     if not api_token:
-        auth_url = get_url('organization/apikeys')
-        api_token = prompt_for_token(auth_url)
+        api_token = prompt_for_token(PH_ENDPOINT)
         if api_token:
             os.environ['PH_API_TOKEN'] = api_token
             save_token_to_file(api_token, "", "")
