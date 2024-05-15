@@ -7,10 +7,8 @@ def main(mode):
     """Posthog CLI"""
     if mode == 'login':
         click.echo("Login mode selected")
-        # Add your login logic here
     elif mode == 'flags':
         click.echo("Flags mode selected")
-        # Add your flags logic here
     else:
         click.echo("Invalid mode selected")
 
