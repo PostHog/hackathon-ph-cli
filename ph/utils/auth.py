@@ -92,10 +92,10 @@ def auth():
 
     # validate if account is active
     url = get_url('project/2/settings/project-details')
-    logger.debug("Validating account...")
+    logger.debug(f"Validating account... {url} {headers}")
     payload={}
     response = requests.get(url, headers=headers, params=payload)
-    print(response)
+    print(response.status_code)
     # if response.status_code == 200:
     #     print(response.json())
     #     data = response.json()
