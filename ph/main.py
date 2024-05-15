@@ -15,10 +15,10 @@ def main(mode):
     logger = logging.getLogger('ph')
 
     if mode == 'login':
-        logger.info("Login mode selected")
+        logger.debug("Login mode selected")
         auth()
     elif mode == 'flags':
-        logger.info("Flags mode selected")
+        logger.debug("Flags mode selected")
     else:
         logger.error("Invalid mode selected")
 
