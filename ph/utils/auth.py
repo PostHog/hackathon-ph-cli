@@ -7,18 +7,19 @@ import inquirer
 logger = logging.getLogger('ph')
 
 CREDENTIALS_FILE = os.path.expanduser('~/.posthog/credentials.json')
+PH_ENDPOINT = os.environ.get('PH_ENDPOINT', 'app.dev.posthog.dev')
 
 def save_token_to_file(token, org, project):
     os.makedirs(os.path.dirname(CREDENTIALS_FILE), exist_ok=True)
     with open(CREDENTIALS_FILE, 'w') as file:
-        json.dump({"credentials": {"app.dev.posthog.dev": {"token": token, "organization": org, "project": project}}}, file)
+        json.dump({"credentials": {PH_ENDPOINT: {"token": token, "organization": org, "project": project}}}, file)
 
 
 def read_token_from_file():
     try:
         with open(CREDENTIALS_FILE, 'r') as file:
             data = json.load(file)
-            return data["credentials"]["app.dev.posthog.dev"]["token"]
+            return data["credentials"][PH_ENDPOINT]["token"]
     except (FileNotFoundError, KeyError):
         return None
     
@@ -26,7 +27,7 @@ def read_organization_from_file():
     try:
         with open(CREDENTIALS_FILE, 'r') as file:
             data = json.load(file)
-            return data["credentials"]["app.dev.posthog.dev"]["organization"]
+            return data["credentials"][PH_ENDPOINT]["organization"]
     except (FileNotFoundError, KeyError):
         return None
     
@@ -34,7 +35,7 @@ def read_project_from_file():
     try:
         with open(CREDENTIALS_FILE, 'r') as file:
             data = json.load(file)
-            return data["credentials"]["app.dev.posthog.dev"]["project"]
+            return data["credentials"][PH_ENDPOINT]["project"]
     except (FileNotFoundError, KeyError):
         return None
 
@@ -48,11 +49,10 @@ def delete_token_from_file():
 
 def get_url(api_part):
     api_protocol = os.environ.get('PH_API_PROTOCOL_WEB', 'https')
-    api_host = os.environ.get('PH_API_HOST_WEB', 'app.dev.posthog.dev')
     api_port = os.environ.get('PH_API_PORT_WEB', '')
     if api_port:
         api_port = f":{api_port}"
-    return f"{api_protocol}://{api_host}{api_port}/{api_part}"
+    return f"{api_protocol}://{PH_ENDPOINT}{api_port}/{api_part}"
 
 def get_token():
     api_token = os.environ.get('PH_API_TOKEN')
