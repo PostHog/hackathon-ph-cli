@@ -93,18 +93,18 @@ def auth():
     # validate if account is active
     url = get_url('project/2/settings/project-details')
     logger.debug(f"Validating account... {url} {headers}")
-    payload={}
-    response = requests.get(url, headers=headers, params=payload)
-    print(response.status_code)
-    # if response.status_code == 200:
-    #     print(response.json())
-    #     data = response.json()
-    #     logger.info(data)
-    # elif response.status_code == 401:
-    #     logger.error(f"{response.status_code} Invalid token provided.")
-    #     delete_token_from_file()
-    #     exit(-1)
-    # else:
-    #     logger.error(f"Error: {response.status_code}")
-    #     exit(-1)
+    response = requests.get(url, headers=headers, allow_redirects=False)
+    if response.status_code == 200:
+        print(response.json())
+        data = response.json()
+        logger.info(data)
+    else:
+        if response.status_code == 401:
+            logger.error(f"{response.status_code} Invalid token provided.")
+        elif response.status_code == 302:
+            logger.error(f"Redirection URL: {response.headers.get('Location')}")
+        else:
+            logger.error(f"Error: {response.status_code}")
+        delete_token_from_file()
+        exit(-1)
 
