@@ -22,9 +22,13 @@ pip install . && ./venv/bin/ph {params}
 Env. variables
 
 `PH_ENDPOINT` defaults to `app.dev.posthog.dev`.
+
 `PH_API_PROTOCOL_WEB` defaults to `https`.
+
 `PH_API_PORT_WEB` defaults to None. If None, it will be ignored.
+
 `PH_API_TOKEN` defaults to None. If None, it will try to read the conf. file `~/.posthog/credentials.json`.
+
 `PH_LOG_LEVEL` defaults to `INFO`.
 
 ## Usage
