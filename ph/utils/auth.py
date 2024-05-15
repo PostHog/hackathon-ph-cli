@@ -10,14 +10,14 @@ CREDENTIALS_FILE = os.path.expanduser('~/.posthog/credentials.json')
 def save_token_to_file(token):
     os.makedirs(os.path.dirname(CREDENTIALS_FILE), exist_ok=True)
     with open(CREDENTIALS_FILE, 'w') as file:
-        json.dump({"credentials": {"app.posthog.com": {"token": token}}}, file)
+        json.dump({"credentials": {"app.dev.posthog.dev": {"token": token}}}, file)
 
 
 def read_token_from_file():
     try:
         with open(CREDENTIALS_FILE, 'r') as file:
             data = json.load(file)
-            return data["credentials"]["app.posthog.com"]["token"]
+            return data["credentials"]["app.dev.posthog.dev"]["token"]
     except (FileNotFoundError, KeyError):
         return None
 
@@ -31,7 +31,7 @@ def delete_token_from_file():
 
 def get_url(api_part):
     api_protocol = os.environ.get('PH_API_PROTOCOL_WEB', 'https')
-    api_host = os.environ.get('PH_API_HOST_WEB', 'app.posthog.com')
+    api_host = os.environ.get('PH_API_HOST_WEB', 'app.dev.posthog.dev')
     api_port = os.environ.get('PH_API_PORT_WEB', '')
     if api_port:
         api_port = f":{api_port}"
