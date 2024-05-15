@@ -1,4 +1,5 @@
 import logging
+from time import sleep
 import requests
 import os
 import json
@@ -147,6 +148,53 @@ def auth(switch_organization=False, switch_project=False):
             logger.error(f"Error: {response.status_code}")
         delete_token_from_file()
         exit(-1)
+
+def create_token():
+    url = get_url('api/login/cli/start')
+    response = requests.post(url, allow_redirects=False)
+    data = response.json()
+    logger.info(f"data cli start: {data}")
+
+    if response.status_code == 200:
+
+        url = get_url('api/login/cli')
+        response = requests.get(url, allow_redirects=False, params={"code": data.get('code')})
+        data = response.json()
+        logger.info(f"data login cli: {data}")
+
+        if response.status_code == 200:
+            confirm = data.get('confirm')
+        else:
+            logger.error(f"Error: {response.status_code}")
+            return
+
+        if confirm:
+            webbrowser.open(confirm)
+
+            while (True):
+                url = get_url('api/login/cli/check')
+                response = requests.get(url, allow_redirects=False, params={"code": data.get('code')})
+                data = response.json()
+                logger.info(f"data login check: {data}")
+
+                if response.status_code == 200:
+                    status = data.get('status')
+
+                    if status == "authenticated":
+                        access_token = data.get('access_token')
+                        save_token_to_file(access_token, "", "")
+                        break
+                    else:
+                        sleep(1)
+                else:
+                    logger.error(f"Error: {response.status_code}")
+                    return
+        else:
+            logger.error("Error: Confirm URL not found.")
+            return
+
+    else:
+        logger.error(f"Error: {response.status_code}")
 
 def select_org(data):
     """Select the organization."""
