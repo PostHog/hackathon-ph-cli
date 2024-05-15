@@ -21,6 +21,13 @@ def read_token_from_file():
     except (FileNotFoundError, KeyError):
         return None
 
+def delete_token_from_file():
+    try:
+        if os.path.exists(CREDENTIALS_FILE):
+            os.remove(CREDENTIALS_FILE)
+    except Exception as e:
+        logger.error(f"Failed to delete token from file: {e}")
+
 
 def get_url(api_part):
     api_protocol = os.environ.get('PH_API_PROTOCOL_WEB', 'https')
@@ -88,4 +95,16 @@ def auth():
     logger.debug("Validating account...")
     payload={}
     response = requests.get(url, headers=headers, params=payload)
+    print(response)
+    # if response.status_code == 200:
+    #     print(response.json())
+    #     data = response.json()
+    #     logger.info(data)
+    # elif response.status_code == 401:
+    #     logger.error(f"{response.status_code} Invalid token provided.")
+    #     delete_token_from_file()
+    #     exit(-1)
+    # else:
+    #     logger.error(f"Error: {response.status_code}")
+    #     exit(-1)
 
