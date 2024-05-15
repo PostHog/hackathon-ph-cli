@@ -8,26 +8,31 @@ from rich.logging import RichHandler
 from rich.console import Console
 
 console = Console()
+logger = logging.getLogger('ph')
 
-@click.command()
-@click.argument('mode', type=click.Choice(['login', 'flags', 'logout']))
-def main(mode):
+@click.group()
+def main():
     """Posthog CLI"""
     setup_logger()
-    logger = logging.getLogger('ph')
 
-    if mode == 'logout':
-        logger.debug("Logout selected")
-        delete_token_from_file()
-    elif mode == 'login':
-        logger.debug("Login mode selected")
-        auth()
-    elif mode == 'flags':
-        logger.debug("Flags mode selected")
-        list_flags()
-    else:
-        logger.error("Invalid mode selected")
+@main.command()
+def logout():
+    logger.debug("Logout")
+    delete_token_from_file()
 
+@main.command()
+def login():
+    logger.debug("Login")
+    auth()
+
+@click.group()
+def flags():
+    pass
+
+@flags.command()
+def list():
+    logger.debug("List flags")
+    list_flags()    
 
 def setup_logger():
     # Set the log level for the root logger to NOTSET (this is required to allow handlers to control the logging level)
@@ -52,6 +57,7 @@ def setup_logger():
     logging.getLogger('urllib3').setLevel(logging.INFO)
 
 
+main.add_command(flags)
+
 if __name__ == "__main__":
     main()
-
