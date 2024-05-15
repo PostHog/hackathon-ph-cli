@@ -112,11 +112,22 @@ def delete_flag(key):
         results = data.get('results')
 
         display_to_id = {option['key']: option['id'] for option in results}
-        id = display_to_id[key]
+        try:
+            id = display_to_id[key]
+        except KeyError:
+            logger.error(f"Flag not found: {key}")
+            return
+
+        data = {
+            "name": key,
+            "id": id,
+            "deleted": True
+            }
 
         url = get_url(f'api/projects/{project_id}/feature_flags/{id}')
-        response = requests.delete(url, headers=headers, allow_redirects=False)
-        if response.status_code == 204:
+        response = requests.patch(url, headers=headers, allow_redirects=False, json=data)
+
+        if response.status_code == 200:
             logger.info(f"Flag deleted: {key}")
         else:
             if response.status_code == 401:
