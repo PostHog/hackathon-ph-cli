@@ -10,7 +10,7 @@ CREDENTIALS_FILE = os.path.expanduser('~/.posthog/credentials.json')
 def save_token_to_file(token):
     os.makedirs(os.path.dirname(CREDENTIALS_FILE), exist_ok=True)
     with open(CREDENTIALS_FILE, 'w') as file:
-        json.dump({"credentials": {"app.dev.posthog.dev": {"token": token}}}, file)
+        json.dump({"credentials": {"app.dev.posthog.dev": {"token": token, "organization": "", "project": ""}}}, file)
 
 
 def read_token_from_file():
