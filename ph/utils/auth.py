@@ -91,13 +91,11 @@ def auth():
     headers = get_headers()
 
     # validate if account is active
-    url = get_url('project/2/settings/project-details')
+    url = get_url('api/organizations')
     logger.debug(f"Validating account... {url} {headers}")
     response = requests.get(url, headers=headers, allow_redirects=False)
     if response.status_code == 200:
-        print(response.json())
         data = response.json()
-        logger.info(data)
     else:
         if response.status_code == 401:
             logger.error(f"{response.status_code} Invalid token provided.")
