@@ -65,7 +65,17 @@ ph flags enable 'test-flag'
 ph flags delete 'test-flag'
 cat ~/.posthog/credentials.json
 ph logout
-ph login
-# its also possible to switch organization and projects but we are using the dev instance
-# and you cannot create multiple projects or organizations, works on my machine tho.
 ```
+
+## Next steps
+
+* TELL JOE THIS IS NOT PUBLISHED YET
+* Frontend bits to approve the automatic token creation
+* More flags conditions
+* Surveys, events, etc
+* Load flags from a config file and apply them
+* Installing PH SDKs
+* Uploading debug symbols (error monitoring)
+* Publish package / executable
+* Github action that wraps the CLI
+* Probably rewrite in a language that does not depend on python/node/etc.

@@ -12,7 +12,7 @@ logger = logging.getLogger('ph')
 
 @click.group()
 def main():
-    """Posthog CLI"""
+    """Posthog CLI - Hola, Amigo!"""
     setup_logger()
 
 @main.command()
@@ -24,7 +24,6 @@ def logout():
 def login():
     logger.debug("Login")
     auth()
-    # create_token()
 
 @main.command()
 def organization():
