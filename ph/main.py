@@ -2,7 +2,7 @@ import click
 import logging
 import os
 
-from ph.utils.flags import create_flag, disable_flag, list_flags, delete_flag, update_flag
+from ph.utils.flags import create_flag, disable_flag, list_flags, delete_flag, update_flag, show_flag
 from .utils.auth import auth, delete_token_from_file
 from rich.logging import RichHandler
 from rich.console import Console
@@ -52,6 +52,13 @@ def list():
 def create(key, description, rollout_percentage):
     logger.debug("Create flag")
     create_flag(key, description, rollout_percentage)
+
+@flags.command()
+@click.argument('key')
+def show(key):
+    logger.debug("Show flag")
+    show_flag(key)
+
 
 @flags.command()
 @click.argument('key')
