@@ -3,6 +3,9 @@ import inquirer
 import requests
 from ph.utils.auth import get_headers, get_url, read_project_from_file
 import logging
+from rich.console import Console
+
+console = Console()
 
 logger = logging.getLogger('ph')
 
@@ -32,7 +35,7 @@ def list_flags():
         answers = inquirer.prompt(questions)
         selected_display = answers.get('select_flag')
         selected_id = display_to_id[selected_display]
-        logger.info(f"Selected flag: {selected_display}: {selected_id}")
+        logger.debug(f"Selected flag: {selected_display}: {selected_id}")
         load_flag(selected_id)
     else:
         if response.status_code == 401:
@@ -50,7 +53,7 @@ def load_flag(id):
     response = requests.get(url, headers=headers, allow_redirects=False)
     if response.status_code == 200:
         data = response.json()
-        logger.info(f"Flag data: {data}")
+        console.print(f"Flag data: {json.dumps(data, indent=4)}")
     else:
         if response.status_code == 401:
             logger.error(f"{response.status_code} Invalid token provided.")
