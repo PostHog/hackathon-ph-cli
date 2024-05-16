@@ -97,7 +97,7 @@ def get_token():
         api_token = read_token_from_file()
 
     if not api_token:
-        api_token = prompt_for_token(PH_ENDPOINT)
+        api_token = create_token()
         if api_token:
             os.environ['PH_API_TOKEN'] = api_token
             save_token_to_file(api_token, "", "")
@@ -156,51 +156,41 @@ def create_token():
 
     if response.status_code == 200:
         data = response.json()
-        logger.info(f"data cli start: {data}")
 
-        url = get_url('api/login/cli')
-        response = requests.get(url, allow_redirects=False, params={"code": data.get('code')})
+        code = data.get('code')
+        # TODO: API is gonna fail if not authenticated
+        # ideally API would forward to the login page and then redirect back to the API call
+        url = get_url(f'api/login/cli?code={code}')
+        # url = get_url(f'login?next=/api/login/cli?code={code}')
+        logger.info(f"Please authenticate by visiting the following URL: {url}")
 
-        # TODO: if not authenticated yet, keep polling?
-        # {'type': 'authentication_error', 'code': 'not_authenticated', 'detail': 'Authentication credentials were not provided.', 'attr': None}
+        webbrowser.open(url)
 
-        if response.status_code == 200:
-            data = response.json()
-            logger.info(f"data login cli: {data}")
+        while True:
+            url = get_url('api/login/cli/check')
+            response = requests.get(url, allow_redirects=False, params={"code": code})
 
-            confirm = data.get('confirm')
-        else:
-            logger.error(f"Error: {response.status_code}")
-            return
+            if response.status_code == 200:
+                data = response.json()
 
-        if confirm:
-            webbrowser.open(confirm)
+                status = data.get('status')
 
-            while (True):
-                url = get_url('api/login/cli/check')
-                response = requests.get(url, allow_redirects=False, params={"code": data.get('code')})
+                if status == "authenticated":
+                    access_token = data.get('access_token')
 
-                if response.status_code == 200:
-                    data = response.json()
-                    logger.info(f"data login check: {data}")
-
-                    status = data.get('status')
-
-                    if status == "authenticated":
-                        access_token = data.get('access_token')
-                        save_token_to_file(access_token, "", "")
-                        break
-                    else:
-                        sleep(1)
+                    if access_token:
+                        return access_token
+                    break
                 else:
-                    logger.error(f"Error: {response.status_code}")
-                    return
-        else:
-            logger.error("Error: Confirm URL not found.")
-            return
+                    sleep(1)
+            else:
+                logger.error(f"Error: {response.status_code}")
+                return None
 
     else:
         logger.error(f"Error: {response.status_code}")
+
+    return None
 
 def select_org(data):
     """Select the organization."""

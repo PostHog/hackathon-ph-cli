@@ -3,7 +3,7 @@ import logging
 import os
 
 from ph.utils.flags import create_flag, disable_flag, list_flags, delete_flag, update_flag
-from .utils.auth import auth, create_token, delete_token_from_file
+from .utils.auth import auth, delete_token_from_file
 from rich.logging import RichHandler
 from rich.console import Console
 
