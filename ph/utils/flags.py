@@ -190,6 +190,25 @@ def disable_flag(key, status):
         else:
             logger.error(f"Error: {response.status_code}")
 
+
+def show_flag(key):
+    """Show flag."""
+    headers = get_headers()
+    project_id = read_project_from_file()
+    url = get_url(f'api/projects/{project_id}/feature_flags')
+    response = requests.get(url, headers=headers, allow_redirects=False)
+    if response.status_code == 200:
+        data = response.json()
+        results = data.get('results')
+
+        display_to_id = {option['key']: option for option in results}
+        try:
+            flag = display_to_id[key]
+            print(json.dumps(flag, indent=4))
+        except KeyError:
+            logger.error(f"Flag not found: {key}")
+            return
+
 def update_flag(key, description, rollout_percentage):
     """Update flag."""
     headers = get_headers()
