@@ -9,12 +9,14 @@ Install
 ```bash
 python3 -m venv venv
 source venv/bin/activate
+pip install .
+export PATH=$PATH:./venv/bin/ph
 ```
 
 Run
 
 ```bash
-pip install . && ./venv/bin/ph {params}
+ph
 ```
 
 ## Configuration
