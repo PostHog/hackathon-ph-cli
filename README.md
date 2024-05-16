@@ -45,7 +45,7 @@ ph flags create {key} -d {description} -p {rollout-percentage} # rollout-percent
 ph flags delete {key}
 ph flags disable {key}
 ph flags enable {key}
-ph flags update {key} -d {description} -p {rollout-percentage} # rollout-percentage defaults to 100
+ph flags update {key} -d {description} -p {rollout-percentage}
 ph flags show {key}
 ```
 
@@ -54,6 +54,7 @@ ph flags show {key}
 ```bash
 ph
 ph login
+ph flags
 ph flags create 'test-flag' -d 'test desc' -p 100
 ph flags show 'test-flag'
 ph flags create 'test-flag-2' -d 'test desc 2' -p 90
@@ -62,6 +63,7 @@ ph flags update 'test-flag' -d 'new desc' -p 90
 ph flags disable 'test-flag'
 ph flags enable 'test-flag'
 ph flags delete 'test-flag'
+cat ~/.posthog/credentials.json
 ph logout
 ph login
 # its also possible to switch organization and projects but we are using the dev instance
