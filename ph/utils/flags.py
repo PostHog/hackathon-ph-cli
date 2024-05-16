@@ -204,7 +204,7 @@ def show_flag(key):
         display_to_id = {option['key']: option for option in results}
         try:
             flag = display_to_id[key]
-            print(json.dumps(flag, indent=4))
+            console.print(json.dumps(flag, indent=4))
         except KeyError:
             logger.error(f"Flag not found: {key}")
             return

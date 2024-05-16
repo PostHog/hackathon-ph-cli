@@ -46,6 +46,7 @@ ph flags delete {key}
 ph flags disable {key}
 ph flags enable {key}
 ph flags update {key} -d {description} -p {rollout-percentage} # rollout-percentage defaults to 100
+ph flags show {key}
 ```
 
 ## Demo
@@ -54,6 +55,7 @@ ph flags update {key} -d {description} -p {rollout-percentage} # rollout-percent
 ph
 ph login
 ph flags create 'test-flag' -d 'test desc' -p 100
+ph flags show 'test-flag'
 ph flags create 'test-flag-2' -d 'test desc 2' -p 90
 ph flags list
 ph flags update 'test-flag' -d 'new desc' -p 90
